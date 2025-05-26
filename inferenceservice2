@@ -1,0 +1,43 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: qwen2-1-5b2
+  namespace: kserve-test
+  annotations: # 이 설정이 있으면 metrics 수집이 지속되면서 pod가 계속 유지될 수 있습니다.
+    serving.kserve.io/enable-prometheus-scraping: "true"
+spec:
+  predictor:
+    ports:
+      - containerPort: 8002
+        name: metrics
+        protocol: TCP
+    model:
+      modelFormat:
+        name: triton-trtllm
+        version: "1"
+      runtime: triton-trtllm
+      storageUri: pvc://llm-model/
+      name: kserve-container
+      command:
+        - bash
+        - -c
+        - |
+          bash /mnt/models/trtllm-entrypoint.sh \
+            --model-name qwen2-1.5B \
+            --model-type qwen \
+            --max-batch-size 8 \
+            --max-beam-width 1 \
+            --kv-cache-fraction 0.5 \
+            --max-tokens-kv 1280 \
+            --attention-window 1280 \
+            --logits-datatype TYPE_FP32 \
+            --http-port 8080 \
+            --grpc-port 8001 \
+            --metrics-port 8002
+      resources:
+        limits:
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "4"
+          memory: 12Gi
+          nvidia.com/gpu: "1"
