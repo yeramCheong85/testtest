@@ -1,4 +1,4 @@
-```
+```mermaid
 flowchart TD
     A[사용자 요청 입력<br>(Prompt, 질문 등)] --> B[검색 요청 로그 수집<br>(RAG Retrieval)]
     B --> C[검색 결과 출력 로그 수집]
